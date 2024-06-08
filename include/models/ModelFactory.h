@@ -22,7 +22,8 @@ static const unordered_map<string, IModel*> modelMap = {
 class ModelFactory {
     public:
     
-    static IModel* createModel(const map<string, string>& modelConfig) {
+    static unique_ptr<IModel> createModel(const IConfig& config) {
+        const auto& modelConfig = config.getModelConfig();
         // Find model
         const auto& it = modelConfig.find("modelType");
         if (it == modelConfig.end())
@@ -33,13 +34,15 @@ class ModelFactory {
         const auto& it = modelMap.find(modelType);
 
         //TODO: debug syntax from modelMap
-        // If model found, return pointer to new instance of the model
-        if (it != modelMap.end()) {
-            return it->second();
-        //Otherwise throw an error
-        } else {
+        if (it == modelMap.end()) {
             throw std::invalid_argument("Unknown model type");
-        }
+        
+        // If model found, return pointer to new instance of the model
+        unique_ptr<IModel> model = make_unique<IModel>(it->second);
+
+        model->initialize(config);
+
+        return model;
     }
 
 };
