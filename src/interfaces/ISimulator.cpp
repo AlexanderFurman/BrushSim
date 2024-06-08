@@ -7,6 +7,7 @@ void ISimulator::initialize(const IConfig& configRef){
 
 void ISimulator::reset(){
     config = nullptr;
+    model = nullptr;
 }
 
 void ISimulator::simulate() {

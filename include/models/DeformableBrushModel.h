@@ -3,7 +3,7 @@
 
 #include "IModel.h"
 
-class DeformableBrushModel{
+class DeformableBrushModel: public IModel{
     //TODO
 }
 

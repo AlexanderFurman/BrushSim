@@ -3,7 +3,7 @@
 
 #include "IModel.h"
 
-class SimpleBrushModel{
+class SimpleBrushModel: public IModel{
     //TODO
 }
 
