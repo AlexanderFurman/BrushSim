@@ -1,22 +1,22 @@
-#include "ISimulator.h"
+#include "Simulator.h"
 
-void ISimulator::initialize(const IConfig& configRef){
+void Simulator::initialize(const IConfig& configRef){
     config = make_unique<IConfig>(configRef);
-    // TODO: Add assignment to model and steps
+    model = make_unique<IModel>(ModelFactory::createModel(config->getModelConfig()))
 }
 
-void ISimulator::reset(){
+void Simulator::reset(){
     config = nullptr;
     model = nullptr;
 }
 
-void ISimulator::simulate() {
+void Simulator::simulate() {
     for (const auto& stepPtr: steps) {
         step(*stepPtr);
     }
 }
 
-void ISimulator::step(const ISimStep& step) {
+void Simulator::step(const ISimStep& step) {
     model->updateState(step);
     const ISimResult& result = model->getResult();
     results.emplace_back(result);

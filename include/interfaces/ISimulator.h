@@ -15,13 +15,6 @@ class ISimulator{
     virtual void step(const ISimStep& step);
     virtual void reset();
     virtual ~ISimulator() = default;
-
-    private:
-    unique_ptr<IConfig> config; //Internal Configuration of the simulation
-    unique_ptr<IModel> model; // Model used during the simulation
-    vector<unique_ptr<ISimStep>> steps; // list of individual simulation steps
-    std::vector<ISimResult> results; // list of results from the simulation steps
-    unique_ptr<IVisualizer> visualizer; // visualizer object
 };
 
 

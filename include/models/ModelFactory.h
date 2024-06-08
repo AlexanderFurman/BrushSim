@@ -22,10 +22,17 @@ static const unordered_map<string, IModel*> modelMap = {
 class ModelFactory {
     public:
     
-    static IModel* createModel(const string& modelType) {
-        // Check if model exists in mapping
-        auto it = modelMap.find(modelType);
+    static IModel* createModel(const map<string, string>& modelConfig) {
+        // Find model
+        const auto& it = modelConfig.find("modelType");
+        if (it == modelConfig.end())
+            throw std::invalid_argument("modelType not specified in config");
+        const auto& modelType = it->second;
 
+        // Check if model exists in mapping
+        const auto& it = modelMap.find(modelType);
+
+        //TODO: debug syntax from modelMap
         // If model found, return pointer to new instance of the model
         if (it != modelMap.end()) {
             return it->second();
