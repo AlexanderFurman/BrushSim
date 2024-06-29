@@ -10,10 +10,10 @@ using namespace std;
 // Abstract class in charge of performing a simulation
 class ISimulator{
     public:
-    virtual void initialize(const IConfig& configRef);
-    virtual void simulate();
-    virtual void step(const ISimStep& step);
-    virtual void reset();
+    virtual void initialize(const IConfig& config) = 0;
+    virtual void simulate() = 0;
+    virtual void step(const ISimStep& step) = 0;
+    virtual void reset() = 0;
     virtual ~ISimulator() = default;
 };
 

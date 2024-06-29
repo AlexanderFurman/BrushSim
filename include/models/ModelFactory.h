@@ -13,11 +13,11 @@ using namespace std;
 #include "SimpleBrushModel.h"
 #include "DeformableBrushModel.h"
 
-// map of string to creation of pointer to new model object -- If implement new model, add mapping here
-static const unordered_map<string, IModel*> modelMap = {
-    {"DeformableBrushModel", []() -> IModel* { return static_cast<IModel*>(new DeformableBrushModel()); }},
-    {"SimpleBrushModel", []() -> IModel* { return static_cast<IModel*>(new SimpleBrushModel()); }}
-};
+// // map of string to creation of pointer to new model object -- If implement new model, add mapping here
+// static const unordered_map<string, IModel*> modelMap = {
+//     {"DeformableBrushModel", []() -> IModel* { return static_cast<IModel*>(new DeformableBrushModel()); }},
+//     {"SimpleBrushModel", []() -> IModel* { return static_cast<IModel*>(new SimpleBrushModel()); }}
+// };
 
 class ModelFactory {
     public:
@@ -29,20 +29,25 @@ class ModelFactory {
         if (it == modelConfig.end())
             throw std::invalid_argument("modelType not specified in config");
         const auto& modelType = it->second;
-
-        // Check if model exists in mapping
-        const auto& it = modelMap.find(modelType);
-
-        //TODO: debug syntax from modelMap
-        if (it == modelMap.end()) {
-            throw std::invalid_argument("Unknown model type");
         
         // If model found, return pointer to new instance of the model
-        unique_ptr<IModel> model = make_unique<IModel>(it->second);
+        IModel* model = createModelInstace(modelType);
 
         model->initialize(config);
 
-        return model;
+        return unique_ptr<IModel>(model);
+    }
+
+
+    private:
+
+    //TODO: dont really like this here, find better place/method to store this mapping
+    static IModel* createModelInstace(const string& name){
+        if (name == "DeformableBrushModel")
+            return static_cast<IModel*>(new DeformableBrushModel());
+        if (name == "SimpleBrushModel")
+            return static_cast<IModel*>(new SimpleBrushModel());
+        throw std::invalid_argument("Unknown model type");
     }
 
 };

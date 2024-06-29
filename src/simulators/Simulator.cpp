@@ -1,8 +1,7 @@
 #include "Simulator.h"
 
-void Simulator::initialize(const IConfig& configRef){
-    config = make_unique<IConfig>(configRef);
-    model = make_unique<IModel>(ModelFactory::createModel(config->getModelConfig()))
+void Simulator::initialize(const IConfig& config){
+    model = ModelFactory::createModel(config);
 }
 
 void Simulator::reset(){

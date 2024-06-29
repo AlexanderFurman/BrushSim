@@ -16,9 +16,11 @@ public:
     IConfig(const IConfig& other);
     
     // Get configs
-    virtual map<string, string> getSimulatorConfig() const = 0;
-    virtual map<string, string> getModelConfig() const = 0;
-    virtual map<string, string> getVisualizationConfig() const = 0;
+    virtual const map<string, string>& getSimulatorConfig() const = 0;
+    virtual const map<string, string>& getModelConfig() const = 0;
+    virtual const map<string, string>& getVisualizationConfig() const = 0;
+
+    //TODO: possibly add functionality for changing certain parts of the config?
 };
 
 #endif

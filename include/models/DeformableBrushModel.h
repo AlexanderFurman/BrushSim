@@ -4,7 +4,9 @@
 #include "IModel.h"
 
 class DeformableBrushModel: public IModel{
-    //TODO
-}
+    void initialize(const IConfig& config) override;
+    void updateState(const ISimStep& simStep) override;
+    
+};
 
 #endif // DEFORMABLEBRUSHMODEL_H
