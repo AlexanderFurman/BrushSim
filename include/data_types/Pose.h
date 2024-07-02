@@ -5,7 +5,7 @@
 
 //Struct which holds position and orientation information of an object
 struct Pose{
-    Eigen::Vector3d position; // position of the object (COM or some other reference point)
+    Eigen::Vector3d position; // position of the object (x,y,z) (COM or some other reference point)
     Eigen::Vector3d orientation; // orientation using Euler angles in radians (roll, pitch, yaw)
 };
 

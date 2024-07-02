@@ -3,6 +3,7 @@
 
 #include "IModel.h"
 #include "Pose.h"
+#include "Twist.h"
 
 // Definition of the brush footprint
 // The footprint describes the contact area between the brush and the paper
@@ -35,6 +36,8 @@ class SimpleBrushModel: public IModel{
     Pose brush_tip; //pose of the tip of the brush
     FootPrint footprint; // information about the footprint of the brush
 
+    public:
+    void updateState(const ISimStep& simStep) override;
 };
 
 #endif // SIMPLEBRUSHMODEL_H
