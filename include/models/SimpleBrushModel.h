@@ -29,7 +29,7 @@ class SimpleBrushModel: public IModel{
     const Pose m_worldFrame; // World frame is defined as the bottom left corner of the paper/canvas. position=[0,0,0], orientation=[0,0,0]
     const Pose m_paper; // pose of center of the paper, relative to world frame.
     //TODO: If this (below) is too slow, replace using Eigen batch multiplication
-    const vector<Pose> m_hairBase; // Collection of poses of all the bases of each hair of the brush, relative to the brush stem
+    const vector<Eigen::Vector3d> m_hairBase; // Collection of positions of all the bases of each hair of the brush, relative to the brush stem
     const Pose m_brushStemInitialPose; // Initial Pose (position + orientation) of the brush, relative to the brush stem. 
                                         // We assume brush initially points upwards and is in the bottom left corner, as in theta = [0,0,1] [rad]
 
