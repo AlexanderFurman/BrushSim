@@ -33,8 +33,6 @@ class SimpleBrushModel: public IModel{
     const vector<Eigen::Vector3d> m_hairBase; // Collection of positions of all the bases of each hair of the brush, relative to the brush stem
     const Pose m_brushStemInitialPose; // Initial Pose (position + orientation) of the brush, relative to the brush stem. 
                                         // We assume brush initially points directly downwards and is in the top left corner, with some elevation off the page (position = [0,0,z], orientation = [0,0,0])
-
-
     //Dynamic Variables
     Pose m_brushStemPose; // pose of center of stem of the brush, relative to world frame.
     Twist m_brushStemTwist; // twist of center of stem of the brush, relative to world frame.
