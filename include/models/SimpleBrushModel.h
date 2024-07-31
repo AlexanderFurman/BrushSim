@@ -41,9 +41,11 @@ class SimpleBrushModel: public IModel{
     Eigen::MatrixXd m_canvas; // canvas with ink/paint deposited
 
     public:
+    SimpleBrushModel() = default;
     void updateState(const ISimStep& simStep) override;
     void initialize(const IConfig& config) override;
     const ISimResult& getResult() const override;
+    void reset() override;
 };
 
 #endif // SIMPLEBRUSHMODEL_H
