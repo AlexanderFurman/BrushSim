@@ -1,6 +1,9 @@
 #ifndef ISIMULATIONDATA_H
 #define ISIMULATIONDATA_H
 
+#include "Pose.h"
+#include "Twist.h"
+
 // Base struct representing simulation data
 struct ISimulationData {
     virtual ~ISimulationData() = default;
@@ -18,6 +21,12 @@ struct ISimStep: public ISimulationData{
 // Abstract struct holding data from the result of the simulation step
 struct ISimResult: public ISimulationData{
     virtual ~ISimResult() = default;
+    virtual const double getTimeStamp() const = 0;
+    virtual const Pose& getPose() const = 0;
 };
+
+
+
+
 
 #endif

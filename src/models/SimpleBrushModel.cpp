@@ -1,5 +1,6 @@
 #include "SimpleBrushModel.h"
 #include "Conversions.h"
+#include "simulation_data/SimulationData.h"
 #include <cmath>
 #include <random>
 
@@ -15,11 +16,14 @@ void SimpleBrushModel::updateState(const ISimStep& simStep){
     const Twist& twist = simStep.getTwist(); // Twist of brush stem
     const double timestamp = simStep.getTimeStamp(); // simulation timestamp
 
+    //Save the current simdata
+    m_currentStepData = simStep;
+
     //TODO:
     //-Find brush tip vector
     //-Find normal vectors of vt, wt using the velocity profile of the current stroke
     // (Maybe consider using a smoothing of a window of previous simsteps/footprints)
-    // Calculate barebones [x,y] from equation in Wong paper.
+    // Calculate [x,y] from equation in Wong paper.
 
 
     // UPDATE BRUSH STEM POSE & BRUSH TIP POSE
@@ -93,3 +97,23 @@ void SimpleBrushModel::updateState(const ISimStep& simStep){
     // update the canvas with the accumulated ink from last stroke
     m_canvas = m_canvas + m_footprint.paintDeposited;
 };
+
+const ISimResult& getResult() const {
+    //Once implemented, should return Pose of the brush stem, position of the brush tip
+    BrushStrokeResult result;
+    
+    //Add new dynamic values to the S
+    result.brushStroke = m_footprint.paintDeposited;
+    result.brushStemPosition = m_brushStemPose.position;
+    result.brushTipPosition = m_brushTipPose.position;
+    result.strokeDirection = m_brushStemTwist.linearVelocity;
+
+    vector<Eigen::Vector3d> handleVertices = generateHandleVertices();
+    vector<Eigen::Vector3d> brushVertices = generateBrushVertices();
+    vector<Eigen::Vector3d> vertices = handleVertices;
+    vertices.insert(vertices.end(), brushVertices.begin(), brushVertices.end());
+    result.vertices = vertices;
+
+    return result;
+}
+

@@ -38,7 +38,14 @@ class SimpleBrushModel: public IModel{
     Twist m_brushStemTwist; // twist of center of stem of the brush, relative to world frame.
     Pose m_brushTipPose; //pose of the tip of the brush
     FootPrint m_footprint; // information about the footprint of the brush
-    Eigen::MatrixXd m_canvas; // canvas with ink/paint deposited
+    Eigen::MatrixXd m_canvas; // canvas with ink/paint deposited (will be used later for checking how much ink left in brush)
+
+    //StepData
+    ISimStep& m_currentStepData; // Maybe save previous step data somewhere?
+
+    vector<Eigen::Vector3d> generateHandleVertices() const;
+    vector<Eigen::Vector3d> generateBrushVertices() const;
+
 
     public:
     SimpleBrushModel() = default;

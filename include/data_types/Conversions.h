@@ -38,6 +38,22 @@ namespace Conversions {
         return eulerToRotationMatrix(roll, pitch, yaw);
     }
 
+    std::vector<Eigen::Vector3d> ConvertNonZeroToVector3d(const Eigen::MatrixXd& matrix) {
+        std::vector<Eigen::Vector3d> points;
+
+        // Iterate through each element of the matrix
+        for (int i = 0; i < matrix.rows(); ++i) {
+            for (int j = 0; j < matrix.cols(); ++j) {
+                if (matrix(i, j) != 0) { // Check if the matrix value is non-zero
+                    // Create a Vector3d with x=i, y=j, z=0.0
+                    points.emplace_back(i, j, 0.0);
+                }
+            }
+        }
+
+        return points;
+    }
+
 } // namespace conversions
 
 #endif // CONVERSIONS_H
