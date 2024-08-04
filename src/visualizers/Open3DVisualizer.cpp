@@ -3,6 +3,7 @@
 
 void Open3DVisualizer::visualize(const ISimResult& result){
     //// NOTE: I'm currently regenerating entire scene upon receiving result. this will definitely change
+    //TODO: break this hideous method into multiple methods
     
     //attempt to dynamic cast to BrushStrokeResult
     const BrushStrokeResult* result = dynamic_cast<const BrushStrokeResult*>(&result);
@@ -38,20 +39,46 @@ void Open3DVisualizer::visualize(const ISimResult& result){
     std::shared_ptr<geometry::LineSet> brushNormalLineSet = generateLineSet
 
     //set brushMesh to transparent grey:
-    Eigen::Vector3d grey_alpha_half(0.5, 0.5, 0.5, 0.5);
-    brushMesh->vertex_colors_.resize(brushMesh->vertices_.size(), grey_alpha_half);
+    // Create brush material
+    geometry::TriangleMesh::Material brushMaterial;
+    brushMaterial.baseColor = geometry::TriangleMesh::Material::MaterialParameter::CreateRGB(0.5f, 0.5f, 0.5f); // grey
+    brushMaterial.baseColor.a() = 0.5f; // semi-transparent
+    // Apply material to brushMesh
+    brushMesh->materials_.emplace_back("BrushMaterial", brushMaterial);
 
     //set canvasMesh to transparent white:
-    Eigen::Vector3d white_alpha_half(1, 1, 1, 0.5);
-    canvasMesh->vertex_colors_.resize(canvasMesh->vertices_.size(), white_alpha_half);
+    // Create canvas material
+    geometry::TriangleMesh::Material canvasMaterial;
+    canvasMaterial.baseColor = geometry::TriangleMesh::Material::MaterialParameter::CreateRGB(1.0f, 1.0f, 1.0f); // white
+    canvasMaterial.baseColor.a() = 0.5f; // semi-transparent
+    // Apply material to canvasMesh
+    canvasMesh->materials_.emplace_back("CanvasMaterial", canvasMaterial);
 
     //set line set color:
-    Eigen::Vector3d green_alpha_1(0, 1, 0, 0.5);
-    brushNormalLineSet->colors_.resize(brushNormalLineSet->lines_.size(), green_alpha_1);
+    Eigen::Vector3d green(0, 1, 0);
+    brushNormalLineSet->colors_.resize(brushNormalLineSet->lines_.size(), green);
     
     //set brushStroke color:
-    Eigen::Vector3d red_alpha_1(1, 0, 0, 1);
-    brushStrokePcd->colors_.resize(brushStrokePcd->points_.size(), red_alpha_1);
+    Eigen::Vector3d red(1, 0, 0);
+    brushStrokePcd->colors_.resize(brushStrokePcd->points_.size(), red);
+
+    // Visualization
+    open3d::visualization::Visualizer visualizer;
+    visualizer.CreateVisualizerWindow("Brush Simulation Visualization");
+
+    visualizer.AddGeometry(canvasMesh);
+    visualizer.AddGeometry(brushMesh);
+    visualizer.AddGeometry(brushStrokePcd);
+    visualizer.AddGeometry(brushNormalLineSet);
+
+    // Optionally set the view
+    visualizer.GetViewControl().SetFront(Eigen::Vector3d(0, 0, -1));
+    visualizer.GetViewControl().SetLookat(Eigen::Vector3d(numRows / 2, numCols / 2, 0));
+    visualizer.GetViewControl().SetUp(Eigen::Vector3d(0, 1, 0));
+    visualizer.GetViewControl().SetZoom(0.8);
+
+    // Run the visualizer
+    visualizer.Run();
 
 }
 

@@ -33,6 +33,8 @@ class SimpleBrushModel: public IModel{
     const vector<Eigen::Vector3d> m_hairBase; // Collection of positions of all the bases of each hair of the brush, relative to the brush stem
     const Pose m_brushStemInitialPose; // Initial Pose (position + orientation) of the brush, relative to the brush stem. 
                                         // We assume brush initially points directly downwards and is in the top left corner, with some elevation off the page (position = [0,0,z], orientation = [0,0,0])
+    const Eigen::Vector3d m_brushInitialNormal; // Initial normal of the brush [0,0,1] (out of the page)
+
     //Dynamic Variables
     Pose m_brushStemPose; // pose of center of stem of the brush, relative to world frame.
     Twist m_brushStemTwist; // twist of center of stem of the brush, relative to world frame.
@@ -41,7 +43,7 @@ class SimpleBrushModel: public IModel{
     Eigen::MatrixXd m_canvas; // canvas with ink/paint deposited (will be used later for checking how much ink left in brush)
 
     //StepData
-    ISimStep& m_currentStepData; // Maybe save previous step data somewhere?
+    SimStep& m_currentStepData; // Maybe save previous step data somewhere?
 
     vector<Eigen::Vector3d> generateHandleVertices() const;
     vector<Eigen::Vector3d> generateBrushVertices() const;
@@ -49,9 +51,9 @@ class SimpleBrushModel: public IModel{
 
     public:
     SimpleBrushModel() = default;
-    void updateState(const ISimStep& simStep) override;
+    void updateState(const SimStep& simStep) override;
     void initialize(const IConfig& config) override;
-    const ISimResult& getResult() const override;
+    const SimResult& getResult() const override;
     void reset() override;
 };
 
