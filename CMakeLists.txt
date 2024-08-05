@@ -5,20 +5,26 @@ project(BrushSim VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include directories
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
 # Find Open3D package
 find_package(Open3D REQUIRED)
 
-# Include directories
-include_directories(${Open3D_INCLUDE_DIRS})
+# Gather all source files
+file(GLOB_RECURSE SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/*.cpp
+)
 
 # Add executable
-add_executable(BrushSim main.cpp ${SOURCE_FILES})
+add_executable(BrushSim
+    ${PROJECT_SOURCE_DIR}/main.cpp
+    ${SOURCE_FILES}
+)
 
-# Link Open3D libraries
-target_link_libraries(BrushSim ${Open3D_LIBRARIES})
+# Specify include directories for BrushSim
+target_include_directories(BrushSim PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/external/json/single_include/nlohmann
+    ${Open3D_INCLUDE_DIRS}
+)
 
 # Include testing if necessary
 include(CTest)

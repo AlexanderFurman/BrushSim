@@ -1,8 +1,8 @@
 #ifndef IMODEL_H
 #define IMODEL_H
 
-#include "ISimulationData.h"
-#include "IConfig.h"
+#include "simulation_data/SimulationData.h"
+#include "interfaces/IConfig.h"
 
 class IModel{
     public:
@@ -12,6 +12,5 @@ class IModel{
     virtual const SimResult& getResult() const = 0;
     virtual void reset() = 0;
 };
-
 
 #endif

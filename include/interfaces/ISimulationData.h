@@ -1,8 +1,8 @@
 #ifndef ISIMULATIONDATA_H
 #define ISIMULATIONDATA_H
 
-#include "Pose.h"
-#include "Twist.h"
+#include "data_types/Pose.h"
+#include "data_types/Twist.h"
 
 // Base struct representing simulation data
 struct ISimulationData {

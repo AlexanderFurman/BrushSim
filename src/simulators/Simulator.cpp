@@ -1,4 +1,4 @@
-#include "Simulator.h"
+#include "simulators/Simulator.h"
 
 void Simulator::initialize(const IConfig& config){
     model = ModelFactory::createModel(config);
