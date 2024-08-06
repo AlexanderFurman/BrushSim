@@ -26,6 +26,12 @@ target_include_directories(BrushSim PRIVATE
     ${Open3D_INCLUDE_DIRS}
 )
 
+# Link Open3D to your target
+target_link_libraries(BrushSim PRIVATE Open3D::Open3D)
+
+# Include Open3D headers
+target_include_directories(BrushSim PRIVATE ${Open3D_INCLUDE_DIRS})
+
 # Include testing if necessary
 include(CTest)
 enable_testing()

@@ -2,8 +2,11 @@
 #define JSONCONFIG_H
 
 #include "interfaces/IConfig.h"
+#include "json.hpp"
+
 
 class JSONConfig: public IConfig{
+    using json = nlohmann::json;
     public:
     // Constructors & Destructors
     JSONConfig(const std::string& filename);

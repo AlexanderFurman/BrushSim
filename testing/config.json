@@ -1,0 +1,16 @@
+{
+    "simulator":{},
+    "model":{
+        "initial pose": "0,0,25;0,0,0",
+        "initial normal": "0,0,1",
+        "initial twist": "0,0,0;0,0,0",
+        "initial timestamp": "0",
+        "canvas height": "500",
+        "canvas width": "600",
+        "brush radius": "10",
+        "brush length": "20",
+        "hair length": "20",
+        "hair count": "100"
+    },
+    "visualizer":{}
+}

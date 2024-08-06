@@ -1,7 +1,9 @@
 #include <stdio.h>
-// #include <iostream>
-// #include <open3d/Open3D.h>
 #include "models/SimpleBrushModel.h"
+#include "configs/JSONConfig.h"
+#include "visualizers/Open3DVisualizer.h"
+#include "simulation_data/SimulationData.h"
+
 
 int main(int, char**){
     ////open3d check
@@ -32,8 +34,25 @@ int main(int, char**){
 
     // return 0;
 
-
+    auto config = JSONConfig("testing/config.json");
     auto model = SimpleBrushModel();
+    auto visualizer = Open3DVisualizer();
+
+    model.initialize(config);
+
+    auto initialState = model.getResult();
+    visualizer.visualize(initialState);
+
+    // Pose p1 = Pose(Eigen::Vector3d(0,0,10), Eigen::Vector3d(0,0,0));
+    // Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
+    // double timestamp = 2;
+    // auto simStep = SimStep(p1, t1, timestamp);
+
+    // model.updateState(simStep);
+    // auto result1 = model.getResult();
+    // visualizer.visualize(result1);
+    
+
     
 
 

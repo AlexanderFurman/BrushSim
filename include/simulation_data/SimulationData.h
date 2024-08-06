@@ -3,7 +3,7 @@
 
 #include "interfaces/ISimulationData.h"
 
-struct SimStep: public ISimulationData {
+class SimStep: public ISimulationData {
     public:
     // Constructor
     SimStep(const Pose& brushStemPose, const Twist& brushStemTwist, const double timeStamp)
@@ -21,9 +21,9 @@ struct SimStep: public ISimulationData {
 
 class SimResult: public ISimulationData {
     public:
-    SimResult(const Eigen::MatrixXd& brushStroke, const Eigen::Vector3d& brushStemPosition, const Eigen::Vector3d& strokeDirection, 
+    SimResult(const Eigen::MatrixXd& brushStroke, const Eigen::Vector3d& brushStemPosition, const Eigen::Vector3d& brushNormal, const Eigen::Vector3d& strokeDirection, 
                 const std::vector<Eigen::Vector3d>& vertices, const double timeStamp)
-                : m_brushStroke(brushStroke), m_brushStemPosition(brushStemPosition), m_strokeDirection(strokeDirection),
+                : m_brushStroke(brushStroke), m_brushStemPosition(brushStemPosition), m_brushNormal(brushNormal), m_strokeDirection(strokeDirection),
                     m_vertices(vertices), m_timeStamp(timeStamp) {}
     
     Eigen::MatrixXd getBrushStroke() const {return m_brushStroke;}

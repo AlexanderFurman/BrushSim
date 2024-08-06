@@ -1,5 +1,6 @@
 #include "models/SimpleBrushModel.h"
-#include "data_types/Conversions.h"
+#include "utils/Conversions.h"
+#include "utils/Geometric.h"
 #include "simulation_data/SimulationData.h"
 #include "utils/Parsing.h"
 #include <cmath>
@@ -9,6 +10,10 @@
 unsigned int seed = 42;
 std::mt19937 gen(seed);
 std::uniform_real_distribution<> dis(0.0, 1.0);
+
+void SimpleBrushModel::reset(){
+    //TODO: find point for this 
+}
 
 void SimpleBrushModel::updateState(const SimStep& simStep){
     //TODO: Break this up into multiple methods
@@ -25,7 +30,7 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     // m_currentStepData = simStep;
 
     // UPDATE BRUSH STEM POSE & BRUSH TIP POSE
-    Eigen::Matrix3d brushRotation = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
+    Eigen::Matrix3d brushRotation = conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
     m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
 
     // UPDATE BRUSH STEM TWIST
@@ -66,8 +71,7 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     rotationMat << std::cos(w + rho), - std::sin(w + rho),
                    std::sin(w + rho), std::cos(w + rho);
     
-
-    for (const Eigen::Vector2d hairPosition: m_hairBase){
+    for (const Eigen::Vector3d hairPosition: m_hairBase){
         // Define the terms in the equation
         Eigen::Vector2d pixel_xy;
         double hairPosition_x = hairPosition[0];
@@ -94,14 +98,17 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     m_canvas = m_canvas + m_footprint.paintDeposited;
 };
 
-const SimResult& SimpleBrushModel::getResult() const {
+const SimResult SimpleBrushModel::getResult() const {
     //Once implemented, should return Pose of the brush stem, position of the brush tip
     std::vector<Eigen::Vector3d> handleVertices = generateHandleVertices();
     std::vector<Eigen::Vector3d> brushVertices = generateBrushVertices();
     std::vector<Eigen::Vector3d> vertices = handleVertices;
     vertices.insert(vertices.end(), brushVertices.begin(), brushVertices.end());
 
-    const SimResult result = SimResult(m_footprint.paintDeposited, m_brushStemPose.position, 
+    Eigen::Matrix3d rotationMat = conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
+    Eigen::Vector3d brushNormal = rotationMat * m_brushInitialNormal;
+
+    SimResult result = SimResult(m_footprint.paintDeposited, m_brushStemPose.position, brushNormal, 
                                     m_brushStemTwist.linearVelocity, vertices, m_timeStamp);
     return result;
 }
@@ -109,17 +116,17 @@ const SimResult& SimpleBrushModel::getResult() const {
 
 std::vector<Eigen::Vector3d> SimpleBrushModel::generateHandleVertices() const{
     Eigen::Vector3d brushStemPosition = m_brushStemPose.position;
-    Eigen::Matrix3d rotationMat = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
+    Eigen::Matrix3d rotationMat = conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
     Eigen::Vector3d brushNormal = rotationMat * m_brushInitialNormal;
 
     double handleLength = 5 * m_brushLength; // magic number, put somewhere else, maybe initialization
-    std::vector<int> lengthLinspace = Conversions::linspace(0, handleLength, 20); // another magic number
+    std::vector<int> lengthLinspace = geometric::linspace(0, handleLength, 20); // another magic number
 
     std::vector<Eigen::Vector3d> brushHandleVertices;
 
     for (int i: lengthLinspace){
-        Eigen::Vector3d ringCenter = brushStemPosition + (i / handleLength) * brushNormal;
-        std::vector<Eigen::Vector3d> ringPoints = Conversions::generateRing(ringCenter, brushNormal, m_brushRadius, 10); // magic number.
+        Eigen::Vector3d ringCenter = brushStemPosition + i* brushNormal;
+        std::vector<Eigen::Vector3d> ringPoints = geometric::generateRing(ringCenter, brushNormal, m_brushRadius, 10); // magic number.
         brushHandleVertices.insert(brushHandleVertices.end(), ringPoints.begin(), ringPoints.end());
     }
     return brushHandleVertices;
@@ -128,17 +135,17 @@ std::vector<Eigen::Vector3d> SimpleBrushModel::generateHandleVertices() const{
 
 std::vector<Eigen::Vector3d> SimpleBrushModel::generateBrushVertices() const{
     Eigen::Vector3d brushStemPosition = m_brushStemPose.position;
-    Eigen::Matrix3d rotationMat = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
+    Eigen::Matrix3d rotationMat = conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
     Eigen::Vector3d brushNormal = - rotationMat * m_brushInitialNormal; // Added negative sign as we will generate points going down towards the brush tip
 
-    std::vector<int> lengthLinspace = Conversions::linspace(0, m_brushLength, 10); // another magic number
+    std::vector<int> lengthLinspace = geometric::linspace(0, m_brushLength, 10); // another magic number
 
     std::vector<Eigen::Vector3d> brushVertices;
 
     for (int i: lengthLinspace){
-        Eigen::Vector3d ringCenter = brushStemPosition + (i / m_brushLength) * brushNormal;
-        double currentBrushRadius = (m_brushLength - i) / m_brushLength; //
-        std::vector<Eigen::Vector3d> ringPoints = Conversions::generateRing(ringCenter, brushNormal, currentBrushRadius, 10); // magic number.
+        Eigen::Vector3d ringCenter = brushStemPosition + i * brushNormal;
+        double currentBrushRadius = m_brushRadius * (m_brushLength - i) / m_brushLength;
+        std::vector<Eigen::Vector3d> ringPoints = geometric::generateRing(ringCenter, brushNormal, currentBrushRadius, 10); // magic number.
         brushVertices.insert(brushVertices.end(), ringPoints.begin(), ringPoints.end());
     }
     return brushVertices;
@@ -175,12 +182,13 @@ void SimpleBrushModel::initialize(const IConfig& config)
     m_brushStemPose = m_brushStemInitialPose;
     m_brushStemTwist = m_brushStemInitialTwist;
 
-    Eigen::Matrix3d brushRotation = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
+    Eigen::Matrix3d brushRotation = conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
     m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
 
     int h = parsing::parseInt(modelConfig.at("canvas height"));
     int w = parsing::parseInt(modelConfig.at("canvas width"));
     m_canvas.resize(h, w);
+    m_footprint.paintDeposited.resize(h, w);
 
     m_timeStamp = parsing::parseDouble(modelConfig.at("initial timestamp"));
 };

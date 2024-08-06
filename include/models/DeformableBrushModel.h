@@ -1,13 +1,14 @@
-#ifndef DEFORMABLEBRUSHMODEL_H
-#define DEFORMABLEBRUSHMODEL_H
+// #ifndef DEFORMABLEBRUSHMODEL_H
+// #define DEFORMABLEBRUSHMODEL_H
 
-#include "IModel.h"
+// #include "interfaces/IModel.h"
 
-class DeformableBrushModel: public IModel{
-    void initialize(const IConfig& config) override;
-    void updateState(const ISimStep& simStep) override;
-    const ISimResult& getResult() const override;
-    void reset() override;
-};
+// class DeformableBrushModel: public IModel{
+//     public:
+//     void initialize(const IConfig& config) override;
+//     void updateState(const SimStep& simStep) override;
+//     const SimResult getResult() const override;
+//     void reset() override;
+// };
 
-#endif // DEFORMABLEBRUSHMODEL_H
+// #endif // DEFORMABLEBRUSHMODEL_H

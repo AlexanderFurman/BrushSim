@@ -1,4 +1,5 @@
 #include "simulators/Simulator.h"
+#include "models/ModelFactory.h"
 
 void Simulator::initialize(const IConfig& config){
     model = ModelFactory::createModel(config);
@@ -15,8 +16,8 @@ void Simulator::simulate() {
     }
 }
 
-void Simulator::step(const ISimStep& step) {
+void Simulator::step(const SimStep& step) {
     model->updateState(step);
-    const ISimResult& result = model->getResult();
+    const SimResult& result = model->getResult();
     results.emplace_back(result);
 }

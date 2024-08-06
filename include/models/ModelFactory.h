@@ -1,7 +1,7 @@
 #ifndef MODELFACTORY_H
 #define MODELFACTORY_H
 
-#include "IModel.h"
+#include "interfaces/IModel.h"
 #include <unordered_map>
 #include <string>
 #include <stdexcept>
@@ -10,8 +10,8 @@
 using namespace std;
 
 //include implemented Brush Models here:
-#include "SimpleBrushModel.h"
-#include "DeformableBrushModel.h"
+#include "models/SimpleBrushModel.h"
+#include "models/DeformableBrushModel.h"
 
 // // map of string to creation of pointer to new model object -- If implement new model, add mapping here
 // static const unordered_map<string, IModel*> modelMap = {
@@ -43,8 +43,8 @@ class ModelFactory {
 
     //TODO: dont really like this here, find better place/method to store this mapping
     static IModel* createModelInstace(const string& name){
-        if (name == "DeformableBrushModel")
-            return static_cast<IModel*>(new DeformableBrushModel());
+        // if (name == "DeformableBrushModel")
+        //     return static_cast<IModel*>(new DeformableBrushModel()); //TODO: return this later
         if (name == "SimpleBrushModel")
             return static_cast<IModel*>(new SimpleBrushModel());
         throw std::invalid_argument("Unknown model type");

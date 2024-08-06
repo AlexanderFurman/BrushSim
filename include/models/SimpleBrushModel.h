@@ -23,9 +23,10 @@ struct FootPrint{
 // This brush model comes from the paper Virtual brush: a model-based synthesis of Chinese calligraphy (Wong et al.)
 class SimpleBrushModel: public IModel{
     public:
+    SimpleBrushModel(){};
     void updateState(const SimStep& simStep) override;
     void initialize(const IConfig& config) override;
-    const SimResult& getResult() const override;
+    const SimResult getResult() const override;
     void reset() override;
 
 
