@@ -49,6 +49,38 @@ namespace parsing{
         }
         return vecList;
     }
+
+    // Helper function to parse a string to a Pose
+    Pose parsePose(const std::string& str) {
+        size_t posSeparator = str.find(';');
+        if (posSeparator == std::string::npos) {
+            throw std::runtime_error("Failed to parse Pose from string: " + str);
+        }
+
+        std::string posStr = str.substr(0, posSeparator);
+        std::string orientStr = str.substr(posSeparator + 1);
+
+        Eigen::Vector3d position = parseVector3d(posStr);
+        Eigen::Vector3d orientation = parseVector3d(orientStr);
+
+        return Pose(position, orientation);
+    }
+
+    // Helper function to parse a string to a Twist
+    Twist parseTwist(const std::string& str) {
+        size_t velSeparator = str.find(';');
+        if (velSeparator == std::string::npos) {
+            throw std::runtime_error("Failed to parse Twist from string: " + str);
+        }
+
+        std::string linVelStr = str.substr(0, velSeparator);
+        std::string angVelStr = str.substr(velSeparator + 1);
+
+        Eigen::Vector3d linearVelocity = parseVector3d(linVelStr);
+        Eigen::Vector3d angularVelocity = parseVector3d(angVelStr);
+
+        return Twist{linearVelocity, angularVelocity};
+    }
 }
 
 

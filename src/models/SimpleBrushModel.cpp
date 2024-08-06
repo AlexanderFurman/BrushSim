@@ -1,6 +1,7 @@
 #include "models/SimpleBrushModel.h"
 #include "data_types/Conversions.h"
 #include "simulation_data/SimulationData.h"
+#include "utils/Parsing.h"
 #include <cmath>
 #include <random>
 
@@ -17,14 +18,15 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     const Twist& twist = simStep.getBrushTwist(); // Twist of brush stem
     const double timestamp = simStep.getTimeStamp(); // simulation timestamp
 
-    //Save the current simdata
-    m_currentStepData = simStep;
+    //UPDATE TIMESTAMP
+    m_timeStamp = timestamp;
+
+    // //Save the current simdata
+    // m_currentStepData = simStep;
 
     // UPDATE BRUSH STEM POSE & BRUSH TIP POSE
     Eigen::Matrix3d brushRotation = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
-    m_brushTipPose = m_brushStemInitialPose; // reset pose of the brush tip
-    m_brushTipPose.position = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,m_brushLength) ); // update the position of the brush tip's Pose to its new position
-    m_brushTipPose.orientation = m_brushStemPose.orientation; // TODO: is this neccessary?
+    m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
 
     // UPDATE BRUSH STEM TWIST
     m_brushStemTwist = twist; // reset pose of the brush tip
@@ -35,7 +37,7 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     double w = std::atan2(v_y, v_x);
 
     // ESTIMATE INITIAL VALUES OF v, u. (As if the brush footprint was a perfect circle)
-    double brushTipPosition_z = m_brushTipPose.position[2];
+    double brushTipPosition_z = m_brushTipPosition[2];
     m_footprint.u = m_brushRadius / (m_brushLength * (m_brushLength - brushTipPosition_z));
     m_footprint.v = m_footprint.u;
 
@@ -55,8 +57,8 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
     //Find (xi, yi) representing the pixel location painted by brush hair i
 
     Eigen::Vector2d brushTipPosition_xy;
-    brushTipPosition_xy << m_brushTipPose.position[0],
-                           m_brushTipPose.position[1];
+    brushTipPosition_xy << m_brushTipPosition[0],
+                           m_brushTipPosition[1];
 
     // Note its not clear here whether they used a vector or a matrix (the notation changed between 2 equations)
     // Trying matrix first, and checking the results. If its wrng, switch this to vector and do cross product
@@ -100,7 +102,7 @@ const SimResult& SimpleBrushModel::getResult() const {
     vertices.insert(vertices.end(), brushVertices.begin(), brushVertices.end());
 
     const SimResult result = SimResult(m_footprint.paintDeposited, m_brushStemPose.position, 
-                                    m_brushStemTwist.linearVelocity, vertices, m_currentStepData.getTimeStamp());
+                                    m_brushStemTwist.linearVelocity, vertices, m_timeStamp);
     return result;
 }
 
@@ -140,4 +142,45 @@ std::vector<Eigen::Vector3d> SimpleBrushModel::generateBrushVertices() const{
         brushVertices.insert(brushVertices.end(), ringPoints.begin(), ringPoints.end());
     }
     return brushVertices;
-}
+};
+
+void SimpleBrushModel::initialize(const IConfig& config)
+{
+    //Note: Maybe would be better if initialize takes in a map instead of IConfig?
+    const std::map<std::string, std::string> modelConfig = config.getModelConfig();
+    m_brushRadius = parsing::parseDouble(modelConfig.at("brush radius"));
+    m_brushLength = parsing::parseDouble(modelConfig.at("brush length"));
+    m_hairLength = parsing::parseDouble(modelConfig.at("hair length"));
+    int hairCount = parsing::parseInt(modelConfig.at("hair count"));
+
+    //Generate the base of each brush hair w.r.t the base of the brush
+    double radius, theta, x, y, rand1, rand2;
+    for (int i=0; i<hairCount; i++){
+        rand1 = dis(gen);
+        rand2 = dis(gen);
+
+        radius = m_brushRadius * rand1;
+        theta = 2 * M_PI * rand2;
+
+        x = radius * cos(theta);
+        y = radius * sin(theta);
+
+        Eigen::Vector3d hairBase(x, y, 0.);
+        m_hairBase.emplace_back(hairBase);
+    }
+
+    m_brushStemInitialPose = parsing::parsePose(modelConfig.at("initial pose"));
+    m_brushInitialNormal = parsing::parseVector3d(modelConfig.at("initial normal"));
+    m_brushStemInitialTwist = parsing::parseTwist(modelConfig.at("initial twist"));
+    m_brushStemPose = m_brushStemInitialPose;
+    m_brushStemTwist = m_brushStemInitialTwist;
+
+    Eigen::Matrix3d brushRotation = Conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
+    m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
+
+    int h = parsing::parseInt(modelConfig.at("canvas height"));
+    int w = parsing::parseInt(modelConfig.at("canvas width"));
+    m_canvas.resize(h, w);
+
+    m_timeStamp = parsing::parseDouble(modelConfig.at("initial timestamp"));
+};
