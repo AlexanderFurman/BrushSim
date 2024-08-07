@@ -48,6 +48,7 @@ class SimpleBrushModel: public IModel{
     //Dynamic Variables
     Pose m_brushStemPose; // pose of center of stem of the brush, relative to world frame.
     Twist m_brushStemTwist; // twist of center of stem of the brush, relative to world frame.
+    Eigen::Vector3d m_brushNormal;
     Eigen::Vector3d m_brushTipPosition; //position of the tip of the brush
     FootPrint m_footprint; // information about the footprint of the brush
     Eigen::MatrixXd m_canvas; // canvas with ink/paint deposited (will be used later for checking how much ink left in brush)

@@ -43,14 +43,44 @@ int main(int, char**){
     // auto initialState = model.getResult();
     // visualizer.visualize(initialState);
 
-    Pose p1 = Pose(Eigen::Vector3d(100,100,10), Eigen::Vector3d(0,0,0));
-    Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
-    double timestamp = 2;
-    auto simStep = SimStep(p1, t1, timestamp);
+    // Pose p1 = Pose(Eigen::Vector3d(100,100,10), Eigen::Vector3d(0,0,0));
+    // Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
+    // double time1 = 2;
+    // auto simStep1 = SimStep(p1, t1, time1);
 
-    model.updateState(simStep);
-    auto result1 = model.getResult();
-    visualizer.visualize(result1);
+    // Pose p2 = Pose(Eigen::Vector3d(110,100,10), Eigen::Vector3d(0,0,0));
+    // Twist t2 = Twist(Eigen::Vector3d(3,0,0), Eigen::Vector3d(0,0,0));
+    // double time2 = 4;
+    // auto simStep2 = SimStep(p2, t2, time2);
+
+    Pose p3 = Pose(Eigen::Vector3d(120,100,5), Eigen::Vector3d(0,0,0));
+    Twist t3 = Twist(Eigen::Vector3d(4,0,0), Eigen::Vector3d(0,0,0));
+    double time3 = 6;
+    auto simStep3 = SimStep(p3, t3, time3);
+
+    Pose p4 = Pose(Eigen::Vector3d(120,110,5), Eigen::Vector3d(0,0,0));
+    Twist t4 = Twist(Eigen::Vector3d(0,2,0), Eigen::Vector3d(0,0,0));
+    double time4 = 8;
+    auto simStep4 = SimStep(p4, t4, time4);
+
+    Pose p5 = Pose(Eigen::Vector3d(120,120,5), Eigen::Vector3d(0,0,0));
+    Twist t5 = Twist(Eigen::Vector3d(0,3,0), Eigen::Vector3d(0,0,0));
+    double time5 = 10;
+    auto simStep5 = SimStep(p5, t5, time5);
+
+    auto steps = std::vector<SimStep>();
+    // steps.emplace_back(simStep1);
+    // steps.emplace_back(simStep2);
+    steps.emplace_back(simStep3);
+    steps.emplace_back(simStep4);
+    steps.emplace_back(simStep5);
+
+
+    for (const auto step: steps){
+        model.updateState(step);
+        auto result1 = model.getResult();
+        visualizer.visualize(result1);
+    }
     
 
     
