@@ -40,17 +40,17 @@ int main(int, char**){
 
     model.initialize(config);
 
-    auto initialState = model.getResult();
-    visualizer.visualize(initialState);
+    // auto initialState = model.getResult();
+    // visualizer.visualize(initialState);
 
-    // Pose p1 = Pose(Eigen::Vector3d(0,0,10), Eigen::Vector3d(0,0,0));
-    // Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
-    // double timestamp = 2;
-    // auto simStep = SimStep(p1, t1, timestamp);
+    Pose p1 = Pose(Eigen::Vector3d(100,100,10), Eigen::Vector3d(0,0,0));
+    Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
+    double timestamp = 2;
+    auto simStep = SimStep(p1, t1, timestamp);
 
-    // model.updateState(simStep);
-    // auto result1 = model.getResult();
-    // visualizer.visualize(result1);
+    model.updateState(simStep);
+    auto result1 = model.getResult();
+    visualizer.visualize(result1);
     
 
     

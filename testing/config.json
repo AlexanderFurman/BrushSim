@@ -1,7 +1,7 @@
 {
     "simulator":{},
     "model":{
-        "initial pose": "0,0,25;0,0,0",
+        "initial pose": "100,100,25;0,0,0",
         "initial normal": "0,0,1",
         "initial twist": "0,0,0;0,0,0",
         "initial timestamp": "0",

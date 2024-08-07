@@ -5,6 +5,7 @@
 #include "utils/Parsing.h"
 #include <cmath>
 #include <random>
+#include <algorithm>
 
 //create random seed for testing
 unsigned int seed = 42;
@@ -43,7 +44,8 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
 
     // ESTIMATE INITIAL VALUES OF v, u. (As if the brush footprint was a perfect circle)
     double brushTipPosition_z = m_brushTipPosition[2];
-    m_footprint.u = m_brushRadius / (m_brushLength * (m_brushLength - brushTipPosition_z));
+    // m_footprint.u = m_brushRadius / (m_brushLength * (m_brushLength - brushTipPosition_z)); // Might be buggy
+    m_footprint.u = m_brushRadius * std::max(-brushTipPosition_z, 0.0) / m_brushLength;
     m_footprint.v = m_footprint.u;
 
     // Modifying factors of v, u -- These are used to deform the footprint into an ellipse when moving the brush on the page
@@ -91,7 +93,12 @@ void SimpleBrushModel::updateState(const SimStep& simStep){
         // For now however, we will assume it will not run out.
 
         // Apply a random density (0-1) of ink to pixel (i,j):  (this should probably a more complex ink depositing mdoel, but lets keep this for testing)
-        m_footprint.paintDeposited.coeffRef(x,y) = dis(gen);
+        int numRows = m_footprint.paintDeposited.rows();
+        int numCols = m_footprint.paintDeposited.cols();
+        if ((x >= 0 && x < numRows) && (y >= 0 && y < numCols))
+        {
+            m_footprint.paintDeposited.coeffRef(x,y) = dis(gen);
+        }
     }
 
     // update the canvas with the accumulated ink from last stroke
