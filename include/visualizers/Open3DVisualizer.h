@@ -6,7 +6,7 @@
 
 
 // This version of the visualizer shows the user a physical model of the brush, and the stroke created by the brush.
-class Open3DVisualizer: IVisualizer{
+class Open3DVisualizer: public IVisualizer{
     public:
     void visualize(const SimResult& result) override;
     void initialize(const IConfig& config) override;

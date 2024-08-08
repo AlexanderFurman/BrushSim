@@ -2,6 +2,7 @@
 #include "models/SimpleBrushModel.h"
 #include "configs/JSONConfig.h"
 #include "visualizers/Open3DVisualizer.h"
+#include "visualizers/OpenCVVisualizer.h"
 #include "simulation_data/SimulationData.h"
 
 
@@ -36,7 +37,8 @@ int main(int, char**){
 
     auto config = JSONConfig("testing/config.json");
     auto model = SimpleBrushModel();
-    auto visualizer = Open3DVisualizer();
+    // auto visualizer = Open3DVisualizer();
+    auto visualizer = OpenCVVisualizer();
 
     model.initialize(config);
 

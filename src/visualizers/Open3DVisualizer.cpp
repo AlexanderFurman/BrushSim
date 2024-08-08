@@ -3,7 +3,7 @@
 
 void Open3DVisualizer::initialize(const IConfig& config)
 {
-
+    throw std::runtime_error("Not implemented");
 }
 
 void Open3DVisualizer::visualize(const SimResult& result){
