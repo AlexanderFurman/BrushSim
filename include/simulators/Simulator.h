@@ -15,11 +15,11 @@ class Simulator: public ISimulator{
     virtual void reset() override;
 
     private:
-    unique_ptr<IConfig> config; //Internal Configuration of the simulation
-    unique_ptr<IModel> model; // Model used during the simulation
-    vector<unique_ptr<SimStep>> steps; // list of individual simulation steps
-    vector<SimResult> results; // list of results from the simulation steps
-    unique_ptr<IVisualizer> visualizer; // visualizer object
+    unique_ptr<IConfig> m_config; //Internal Configuration of the simulation
+    unique_ptr<IModel> m_model; // Model used during the simulation
+    vector<unique_ptr<SimStep>> m_steps; // list of individual simulation steps
+    vector<SimResult> m_results; // list of results from the simulation steps
+    unique_ptr<IVisualizer> m_visualizer; // visualizer object
 };
 
 

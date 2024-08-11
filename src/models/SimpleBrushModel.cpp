@@ -7,6 +7,7 @@
 #include <random>
 #include <algorithm>
 #include <iostream>
+#include <chrono>
 
 //create random seed for testing
 unsigned int seed = 42;
@@ -14,135 +15,18 @@ std::mt19937 gen(seed);
 std::uniform_real_distribution<> dis(0.0, 1.0);
 
 void SimpleBrushModel::reset(){
-    //TODO: find point for this 
+    throw std::runtime_error("Not Implemented");
 }
 
 void SimpleBrushModel::updateState(const SimStep& simStep){
-    //TODO: Break this up into multiple methods
-
-    //Extract const data from simulation step
-    m_brushStemPose = simStep.getBrushPose(); // Pose of brush stem
-    const Twist& twist = simStep.getBrushTwist(); // Twist of brush stem
-    const double timestamp = simStep.getTimeStamp(); // simulation timestamp
-
-    //UPDATE TIMESTAMP
-    m_timeStamp = timestamp;
-
-    // //Save the current simdata
-    // m_currentStepData = simStep;
-
-    // UPDATE BRUSH STEM POSE & BRUSH TIP POSE
-    Eigen::Matrix3d brushRotation = conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
-    m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
-
-    m_brushNormal = brushRotation * m_brushInitialNormal;
-    // UPDATE BRUSH STEM TWIST
-    m_brushStemTwist = twist; // reset pose of the brush tip
-
-    // ESTIMATE w -- angle of rotation of the ellipse w.r.t. the x-axis of the world frame.
-    double v_x = m_brushStemTwist.linearVelocity[0];
-    double v_y = m_brushStemTwist.linearVelocity[1];
-    double w = std::atan2(v_y, v_x); //angle between x axis (down the page) and the stroke direction (in radians)
-
-    // ESTIMATE INITIAL VALUES OF v, u. (As if the brush footprint was a perfect circle)
-    double brushTipPosition_z = m_brushTipPosition[2];
-    // m_footprint.u = m_brushRadius / (m_brushLength * (m_brushLength - brushTipPosition_z)); // Might be buggy
-    auto max_abs_z = std::max(-brushTipPosition_z, 0.0);
-    m_footprint.u = m_brushRadius * max_abs_z / m_brushLength;
-    m_footprint.v = m_footprint.u;
-
-    // Modifying factors of v, u -- These are used to deform the footprint into an ellipse when moving the brush on the page
-    // In the paper they seem to be numbers generated upon trial and error.
-    // Will input constant values for now, but can dafinitely update these values according to speed of brush
-    m_footprint.k_u = 1.2;
-    m_footprint.k_v = 0.7;
-    
-    // ellipse rotation modifying factor -- seemingly used when "extra rotation" is needed in a brushstroke
-    // For now, will set a constant value, however it seems that the angle can actually be determined by comparing the
-    // angle between the brush stroke direction, and the direction of the brush
-    double rho = 0; // The paper uses values -0.6 <= rho <= 0, mostly 0
-
-    double b = 0; // Another modifying factor -- for bias
-
-    //Find (xi, yi) representing the pixel location painted by brush hair i
-
-    Eigen::Vector2d brushTipPosition_xy;
-    brushTipPosition_xy << m_brushTipPosition[0],
-                           m_brushTipPosition[1];
-
-    // Note its not clear here whether they used a vector or a matrix (the notation changed between 2 equations)
-    // Trying matrix first, and checking the results. If its wrng, switch this to vector and do cross product
-    Eigen::Matrix2d rotationMat;
-    rotationMat << std::cos(w + rho), - std::sin(w + rho),
-                   std::sin(w + rho), std::cos(w + rho);
-    
-    // for (const Eigen::Vector3d hairPosition: m_hairBase){
-    //     // Define the terms in the equation
-    //     Eigen::Vector2d pixel_xy;
-    //     double hairPosition_x = hairPosition[0];
-    //     double hairPosition_y = hairPosition[1];
-    //     Eigen::Vector2d hairPositionScaled;
-    //     hairPositionScaled << hairPosition_x * (m_footprint.v * m_footprint.k_v + b) / m_brushRadius,
-    //                           hairPosition_y * (m_footprint.u * m_footprint.k_u + b) / m_brushRadius;
-
-        
-    //     pixel_xy = brushTipPosition_xy + rotationMat * hairPositionScaled;
-
-    //     double x, y;
-    //     x = std::round(pixel_xy[0]);
-    //     y = std::round(pixel_xy[1]);
-
-    //     // Note: we need to define some kind of ink model, which states firstly how much ink can be used by a brush before it needs to be redipped.
-    //     // For now however, we will assume it will not run out.
-
-    //     // Apply a random density (0-1) of ink to pixel (i,j):  (this should probably a more complex ink depositing mdoel, but lets keep this for testing)
-    //     int numRows = m_footprint.paintDeposited.rows();
-    //     int numCols = m_footprint.paintDeposited.cols();
-    //     if ((x >= 0 && x < numRows) && (y >= 0 && y < numCols))
-    //     {
-    //         m_footprint.paintDeposited.coeffRef(x,y) = dis(gen);
-    //     }
-    // }
-
-    // Checking the correct geometry generated
-    Eigen::Vector3d center = geometric::linePlaneIntersection(m_brushTipPosition, m_brushNormal, Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,0,1));
-    // auto ellipse = geometric::generateEllipse(center, Eigen::Vector3d(0,0,1), m_footprint.v, m_footprint.u, 100); 
-    auto ellipse = geometric::generateEllipse(center, Eigen::Vector3d(0,0,1), m_footprint.v * m_footprint.k_v + b, m_footprint.u * m_footprint.k_u + b, 200); 
-    double x, y;
-    Eigen::Vector2d xy_scaled;
-    Eigen::Vector2d pixel_xy;
-    int pixel_x, pixel_y;
-    Eigen::Vector2d check(0,0);
-    for (const Eigen::Vector3d point: ellipse){
-        x = point[0];
-        y = point[1];
-        // auto x_scaled = x * (m_footprint.v * m_footprint.k_v + b) / m_brushRadius;
-        // auto y_scaled = y * (m_footprint.u * m_footprint.k_u + b) / m_brushRadius;
-        // xy_scaled[0] = x_scaled;
-        // xy_scaled[1] = y_scaled;
-        xy_scaled[0] = x;
-        xy_scaled[1] = y;
-        check = rotationMat * xy_scaled;
-        pixel_xy = brushTipPosition_xy + rotationMat * (xy_scaled - brushTipPosition_xy);
-        // pixel_x = std::round(pixel_xy[0]);
-        // pixel_y = std::round(pixel_xy[1]);
-        
-        pixel_x = std::round(pixel_xy[0]);
-        pixel_y = std::round(pixel_xy[1]);
-        int numRows = m_footprint.paintDeposited.rows();
-        int numCols = m_footprint.paintDeposited.cols();
-        if ((pixel_x >= 0 && pixel_x < numRows) && (pixel_y >= 0 && pixel_y < numCols))
-        {
-            m_footprint.paintDeposited.coeffRef(pixel_x, pixel_y) = 1.0;//dis(gen);
-        }
-    }
-
-    // update the canvas with the accumulated ink from last stroke
-    m_canvas = m_canvas + m_footprint.paintDeposited;
+    updateBrushState(simStep);
+    updateFootPrintState();
+    generateBrushStroke();
+    updateCanvasState();
+    generateFootPrintBoundary();
 };
 
 const SimResult SimpleBrushModel::getResult() const {
-    //Once implemented, should return Pose of the brush stem, position of the brush tip
     std::vector<Eigen::Vector3d> handleVertices = generateHandleVertices();
     std::vector<Eigen::Vector3d> brushVertices = generateBrushVertices();
     std::vector<Eigen::Vector3d> vertices = handleVertices;
@@ -155,6 +39,124 @@ const SimResult SimpleBrushModel::getResult() const {
     return result;
 }
 
+void SimpleBrushModel::updateBrushState(const SimStep& simStep){
+    m_brushStemPose = simStep.getBrushPose(); // Pose of brush stem
+    m_brushStemTwist = simStep.getBrushTwist(); // Twist of brush stem
+    m_timeStamp = simStep.getTimeStamp(); // simulation timestamp
+
+    Eigen::Matrix3d brushRotation = conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
+    m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position
+
+    m_brushNormal = brushRotation * m_brushInitialNormal;
+}
+
+void SimpleBrushModel::updateFootPrintState(){
+    // ESTIMATE w -- angle of rotation of the ellipse w.r.t. the x-axis of the world frame.
+    double v_x = m_brushStemTwist.linearVelocity[0];
+    double v_y = m_brushStemTwist.linearVelocity[1];
+    m_footprint.w = std::atan2(v_y, v_x); //angle between x axis (down the page) and the stroke direction (in radians)
+
+    // ESTIMATE INITIAL VALUES OF v, u. (As if the brush footprint was a perfect circle)
+    double brushTipPosition_z = m_brushTipPosition[2];
+    auto max_abs_z = std::max(-brushTipPosition_z, 0.0);
+    m_footprint.u = m_brushRadius * max_abs_z / m_brushLength;
+    m_footprint.v = m_footprint.u;
+
+    // Modifying factors of v, u -- These are used to deform the footprint into an ellipse when moving the brush on the page
+    // In the paper they seem to be numbers generated upon trial and error.
+    // Will input constant values for now, but can dafinitely update these values according to speed of brush
+    m_footprint.k_u = 1.2;
+    m_footprint.k_v = 0.7;
+    
+    // ellipse rotation modifying factor -- seemingly used when "extra rotation" is needed in a brushstroke
+    // For now, will set a constant value, however it seems that the angle can actually be determined by comparing the
+    // angle between the brush stroke direction, and the direction of the brush (not sure, but need to try)
+    m_footprint.rho = 0; // The paper uses values -0.6 <= rho <= 0, mostly 0
+
+    m_footprint.b = 0; // Another modifying factor -- for bias
+
+}
+
+void SimpleBrushModel::generateBrushStroke(){
+    Eigen::Vector2d brushTipPosition_xy;
+    brushTipPosition_xy << m_brushTipPosition[0],
+                           m_brushTipPosition[1];
+
+    Eigen::Matrix2d rotationMat;
+    rotationMat << std::cos(m_footprint.w + m_footprint.rho), - std::sin(m_footprint.w + m_footprint.rho),
+                   std::sin(m_footprint.w + m_footprint.rho), std::cos(m_footprint.w + m_footprint.rho);
+
+    double x, y;
+    Eigen::Vector2d xy_scaled;
+    Eigen::Vector2d pixel_xy;
+    int pixel_x, pixel_y;
+    
+    int numRows = m_footprint.paintDeposited.rows();
+    int numCols = m_footprint.paintDeposited.cols();
+
+    for (const Eigen::Vector3d& point: m_hairBase){
+        x = point[0];
+        y = point[1];
+        // scale x, y according to the ellipse forming the boundary of the footprint
+        auto x_scaled = x * (m_footprint.v * m_footprint.k_v + m_footprint.b) / m_brushRadius;
+        auto y_scaled = y * (m_footprint.u * m_footprint.k_u + m_footprint.b) / m_brushRadius;
+        xy_scaled[0] = x_scaled;
+        xy_scaled[1] = y_scaled;
+
+        // rotate the brush's footprint according to the value of w
+        pixel_xy = brushTipPosition_xy + rotationMat * (xy_scaled);
+
+        // round the values and covert to ints, so they can represent indices in the canvas
+        pixel_x = (int) std::round(pixel_xy[0]);
+        pixel_y = (int) std::round(pixel_xy[1]);
+
+        // check if the indices found are within the bounds of the canvas
+        if ((pixel_x >= 0 && pixel_x < numRows) && (pixel_y >= 0 && pixel_y < numCols))
+        {
+            //deposit paint onto the canvas. 
+            //TODO: the paper implements this in a more complex way, taking into account the ink level in the brush.
+            // implement this logic to the SimpleBrushModel.
+            m_footprint.paintDeposited.coeffRef(pixel_x, pixel_y) = dis(gen);
+        }
+    }
+}
+
+void SimpleBrushModel::generateFootPrintBoundary(){
+    Eigen::Vector2d brushTipPosition_xy;
+    brushTipPosition_xy << m_brushTipPosition[0],
+                           m_brushTipPosition[1];
+
+    Eigen::Matrix2d rotationMat;
+    rotationMat << std::cos(m_footprint.w + m_footprint.rho), - std::sin(m_footprint.w + m_footprint.rho),
+                   std::sin(m_footprint.w + m_footprint.rho), std::cos(m_footprint.w + m_footprint.rho);
+
+    auto ellipse = geometric::generateEllipse(Eigen::Vector3d::Zero(), Eigen::Vector3d(0,0,1), m_footprint.v * m_footprint.k_v + m_footprint.b, m_footprint.u * m_footprint.k_u + m_footprint.b, 200); 
+    
+    Eigen::Vector2d point_xy;
+    Eigen::Vector2d pixel_xy;
+    int pixel_x, pixel_y;
+    
+    int numRows = m_footprint.paintDeposited.rows();
+    int numCols = m_footprint.paintDeposited.cols();
+
+    for (const Eigen::Vector3d& point: ellipse){
+        point_xy = Eigen::Vector2d(point[0], point[1]);
+        pixel_xy = brushTipPosition_xy + rotationMat * (point_xy);
+        pixel_x = (int) std::round(pixel_xy[0]);
+        pixel_y = (int) std::round(pixel_xy[1]);
+
+        if ((pixel_x >= 0 && pixel_x < numRows) && (pixel_y >= 0 && pixel_y < numCols))
+        {
+            m_footprint.boundary.coeffRef(pixel_x, pixel_y) = 1;
+        }
+    }
+}
+
+void SimpleBrushModel::updateCanvasState(){
+    // update the canvas with the accumulated ink from last stroke
+    m_canvas = m_canvas + m_footprint.paintDeposited;
+}
+
 
 std::vector<Eigen::Vector3d> SimpleBrushModel::generateHandleVertices() const{
     Eigen::Vector3d brushStemPosition = m_brushStemPose.position;
@@ -162,7 +164,7 @@ std::vector<Eigen::Vector3d> SimpleBrushModel::generateHandleVertices() const{
     Eigen::Vector3d brushNormal = rotationMat * m_brushInitialNormal;
 
     double handleLength = 5 * m_brushLength; // magic number, put somewhere else, maybe initialization
-    std::vector<int> lengthLinspace = geometric::linspace(0, handleLength, 20); // another magic number
+    std::vector<double> lengthLinspace = geometric::linspace<double>(0, handleLength, 20); // another magic number
 
     std::vector<Eigen::Vector3d> brushHandleVertices;
 
@@ -180,7 +182,7 @@ std::vector<Eigen::Vector3d> SimpleBrushModel::generateBrushVertices() const{
     Eigen::Matrix3d rotationMat = conversions::eulerToRotationMatrix(m_brushStemPose.orientation);
     Eigen::Vector3d brushNormal = - rotationMat * m_brushInitialNormal; // Added negative sign as we will generate points going down towards the brush tip
 
-    std::vector<int> lengthLinspace = geometric::linspace(0, m_brushLength, 10); // another magic number
+    std::vector<double> lengthLinspace = geometric::linspace<double>(0, m_brushLength, 10); // another magic number
 
     std::vector<Eigen::Vector3d> brushVertices;
 
@@ -231,6 +233,7 @@ void SimpleBrushModel::initialize(const IConfig& config)
     int w = parsing::parseInt(modelConfig.at("canvas width"));
     m_canvas.resize(h, w);
     m_footprint.paintDeposited.resize(h, w);
+    m_footprint.boundary.resize(h, w);
 
     m_timeStamp = parsing::parseDouble(modelConfig.at("initial timestamp"));
 };

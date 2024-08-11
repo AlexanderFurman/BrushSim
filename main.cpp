@@ -4,36 +4,10 @@
 #include "visualizers/Open3DVisualizer.h"
 #include "visualizers/OpenCVVisualizer.h"
 #include "simulation_data/SimulationData.h"
+#include "utils/Geometric.h"
 
 
 int main(int, char**){
-    ////open3d check
-    // printf("Hello, from BrushSim!\n");
-
-    // // Path to the point cloud file
-    // std::string filename = "/home/alex/Projects/bunny.ply";
-
-    // // Initialize Open3D
-    // std::cout << "Initializing Open3D..." << std::endl;
-
-    // // Load the point cloud from the file
-    // auto pcd = std::make_shared<open3d::geometry::PointCloud>();
-    // if (open3d::io::ReadPointCloud(filename, *pcd)) {
-    //     std::cout << "Point cloud successfully loaded from " << filename << std::endl;
-    //     std::cout << "Number of points: " << pcd->points_.size() << std::endl;
-    // } else {
-    //     std::cerr << "Failed to load point cloud from " << filename << std::endl;
-    //     return -1;
-    // }
-
-    // // Optional: Visualize the point cloud using Open3D's visualizer
-    // auto vis = std::make_shared<open3d::visualization::Visualizer>();
-    // vis->CreateVisualizerWindow("Open3D Point Cloud Viewer", 800, 600);
-    // vis->AddGeometry(pcd);
-    // vis->Run();
-    // vis->DestroyVisualizerWindow();
-
-    // return 0;
 
     auto config = JSONConfig("testing/config.json");
     auto model = SimpleBrushModel();
@@ -42,50 +16,94 @@ int main(int, char**){
 
     model.initialize(config);
 
-    // auto initialState = model.getResult();
+    auto initialState = model.getResult();
     // visualizer.visualize(initialState);
 
-    // Pose p1 = Pose(Eigen::Vector3d(100,100,10), Eigen::Vector3d(0,0,0));
-    // Twist t1 = Twist(Eigen::Vector3d(0,0,-1), Eigen::Vector3d(0,0,0));
-    // double time1 = 2;
-    // auto simStep1 = SimStep(p1, t1, time1);
-
-    // Pose p2 = Pose(Eigen::Vector3d(110,100,10), Eigen::Vector3d(0,0,0));
-    // Twist t2 = Twist(Eigen::Vector3d(3,0,0), Eigen::Vector3d(0,0,0));
-    // double time2 = 4;
-    // auto simStep2 = SimStep(p2, t2, time2);
-
-    Pose p3 = Pose(Eigen::Vector3d(120,100,5), Eigen::Vector3d(0,0,0));
-    Twist t3 = Twist(Eigen::Vector3d(4,0,0), Eigen::Vector3d(0,0,0));
-    double time3 = 6;
-    auto simStep3 = SimStep(p3, t3, time3);
-
-    Pose p4 = Pose(Eigen::Vector3d(120,110,5), Eigen::Vector3d(0,0,0));
-    Twist t4 = Twist(Eigen::Vector3d(0,2,0), Eigen::Vector3d(0,0,0));
-    double time4 = 8;
-    auto simStep4 = SimStep(p4, t4, time4);
-
-    Pose p5 = Pose(Eigen::Vector3d(120,120,5), Eigen::Vector3d(0,0,0));
-    Twist t5 = Twist(Eigen::Vector3d(0,3,0), Eigen::Vector3d(0,0,0));
-    double time5 = 10;
-    auto simStep5 = SimStep(p5, t5, time5);
+    std::vector<int> timestamps = geometric::linspace<int>(0, 79, 80);
+    std::vector<double> linspace_x = geometric::linspace<double>(20, 200, 80);
+    std::vector<double> linspace_y_1 = geometric::linspace<double>(200, 200, 20);
+    std::vector<double> linspace_y_2 = geometric::linspace<double>(200, 260, 60);
+    std::vector<double> linspace_y = linspace_y_1;
+    linspace_y.insert(linspace_y.end(), linspace_y_2.begin(), linspace_y_2.end());
+    auto linspace_helper = geometric::linspace<double>(0, 2*M_PI, 80);
+    std::vector<double> linspace_z;
+    for (const double i: linspace_helper){
+        // linspace_z.emplace_back(20 * (std::pow((std::sin(i/2)), 2)) + 1);
+        linspace_z.emplace_back(1);
+    }
+    int n = timestamps.size();
+    assert(n == linspace_y.size());
 
     auto steps = std::vector<SimStep>();
-    // steps.emplace_back(simStep1);
-    // steps.emplace_back(simStep2);
-    steps.emplace_back(simStep3);
-    steps.emplace_back(simStep4);
-    steps.emplace_back(simStep5);
+    double x, y, z;
+    double v_x, v_y, v_z;
+    double t = 0;
+    double t_prev;
+    Eigen::Vector3d orientation(0,0,0);
+    Eigen::Vector3d angularVel(0,0,0);
+    Eigen::Vector3d position, linearVel;
+    Eigen::Vector3d position_prev;
+    for (int i=0; i<n; i++){
+        x = linspace_x[i];
+        y = linspace_y[i];
+        z = linspace_z[i];
+
+        t = timestamps[i];
+
+        if (t == t_prev){
+            position = Eigen::Vector3d(x,y,z);
+            linearVel = Eigen::Vector3d(1,0,0);
+        }
+        else{
+            position = Eigen::Vector3d(x,y,z);
+            linearVel = (position - position_prev)/(t - t_prev);
+        }
+
+        Pose pose = Pose(position, orientation);
+        Twist twist = Twist(linearVel, angularVel);
+
+        auto simStep = SimStep(pose, twist, t);
+        steps.emplace_back(simStep);
+
+        t_prev = t;
+        position_prev = position;
+    }
+
+    double update, res, vis;
+    using Clock = std::chrono::high_resolution_clock;
+    using timePoint = std::chrono::_V2::system_clock::time_point;
+    using duration = std::chrono::duration<double>;
+
+    timePoint start;
+    timePoint end;
+    duration timeTaken;
 
 
     for (const auto step: steps){
+        start = Clock::now();
         model.updateState(step);
-        auto result1 = model.getResult();
-        visualizer.visualize(result1);
+        end = Clock::now();
+        timeTaken = end - start;
+        update = update + timeTaken.count();
+        
+
+        start = Clock::now();
+        auto result = model.getResult();
+        end = Clock::now();
+        timeTaken = end - start;
+        res = res + timeTaken.count();
+
+        start = Clock::now();
+        visualizer.visualize(result);
+        end = Clock::now();
+        timeTaken = end - start;
+        vis = vis + timeTaken.count();
     }
-    
+    assert(n == steps.size());
+    update = update/n;
+    res = res/n;
+    vis = vis/n;
 
-    
-
-
+    std::cout << "update: " << update << ", res: " << res << ", vis: " << vis << "." << std::endl;
+    std::cout << ".";
 }

@@ -4,19 +4,21 @@
 
 namespace geometric{
     
-    // Function to generate linspace of integers
-    std::vector<int> linspace(int start, int end, int num) {
-        std::vector<int> result;
-        if (num < 1){
-            throw std::runtime_error("Need at least 2 numbers in the linspace");
-        }
+    // // Function to generate linspace of values
+    // template <typename T>
+    // std::vector<T> linspace(T start, T end, int num) {
+    //     static_assert(std::is_arithmetic<T>::value, "Template param T should be numeric type.");
+    //     std::vector<T> result;
+    //     if (num < 1){
+    //         throw std::runtime_error("Need at least 2 numbers in the linspace");
+    //     }
         
-        double step = static_cast<double>(end - start) / (num - 1);
-        for (int i = 0; i < num; ++i) {
-            result.push_back(start + static_cast<int>(i * step));
-        }
-        return result;
-    };
+    //     double step = (end - start) / (num - 1);
+    //     for (int i = 0; i < num; ++i) {
+    //         result.push_back(static_cast<T>(start + i * step));
+    //     }
+    //     return result;
+    // };
 
     // Function to generate a ring of points around a center point given a normal vector
     std::vector<Eigen::Vector3d> generateRing(const Eigen::Vector3d& center, const Eigen::Vector3d& normal, double radius, int num_points) {

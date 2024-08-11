@@ -3,6 +3,7 @@
 
 #include "interfaces/ISimulationData.h"
 
+// TODO: Consider revamping these classes to be more generic, or possibly work with an adapter class
 class SimStep: public ISimulationData {
     public:
     // Constructor
@@ -38,7 +39,6 @@ class SimResult: public ISimulationData {
     Eigen::MatrixXd m_brushStroke; // instantaneous brush stroke on the canvas
     Eigen::Vector3d m_brushStemPosition; 
     Eigen::Vector3d m_brushNormal;
-    // Eigen::Vector3d& brushTipPosition; // change this -- may not be able to use this for otehr more complex models
     Eigen::Vector3d m_strokeDirection;
     std::vector<Eigen::Vector3d> m_vertices; // vertices describing the brush's position in 3D
     double m_timeStamp;
