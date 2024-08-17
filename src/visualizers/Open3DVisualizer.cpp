@@ -53,11 +53,6 @@ void Open3DVisualizer::initializeVisualizer(const std::map<std::string, std::str
     this->togglePause(vis);
     return true;  // Return true if the event was handled, false otherwise
     });
-
-    m_vis.Run();
-
-    
-
 }
 
 void Open3DVisualizer::initialize(const IConfig& config)

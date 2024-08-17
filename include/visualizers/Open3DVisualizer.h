@@ -22,6 +22,9 @@ class Open3DVisualizer: public IVisualizer{
     Pose m_brushStemPose;
     bool is_paused = false;
 
+    //TODO: Add simulation clock which ensures that the brush moves according to the timestamps provided by simstep,
+    // and not simply by completing the stroke according to compute time.
+
 
     void generateCanvas(int numRows, int numCols);
     void updateBrush(const std::vector<Eigen::Vector3d>& vertices, const Pose& pose);

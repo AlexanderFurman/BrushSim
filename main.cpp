@@ -21,8 +21,8 @@ int main(int, char**){
 
     std::vector<int> timestamps = geometric::linspace<int>(0, 79, 80);
     std::vector<double> linspace_x = geometric::linspace<double>(20, 200, 80);
-    std::vector<double> linspace_y_1 = geometric::linspace<double>(0, 0, 20);
-    std::vector<double> linspace_y_2 = geometric::linspace<double>(0, 60, 60);
+    std::vector<double> linspace_y_1 = geometric::linspace<double>(100, 100, 20);
+    std::vector<double> linspace_y_2 = geometric::linspace<double>(100, 160, 60);
     std::vector<double> linspace_y = linspace_y_1;
     linspace_y.insert(linspace_y.end(), linspace_y_2.begin(), linspace_y_2.end());
     auto linspace_helper = geometric::linspace<double>(0, 2*M_PI, 80);
