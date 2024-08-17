@@ -26,6 +26,11 @@ namespace geometric{
                                         const Eigen::Vector3d& lineDir,
                                         const Eigen::Vector3d& planePoint,
                                         const Eigen::Vector3d& planeNormal);
+    
+    Eigen::Vector3d computeCentroid(const std::vector<Eigen::Vector3d>& points);
+
+    Eigen::Vector3d computeNormal(const Eigen::Vector3d& orientation, const Eigen::Vector3d& referenceVector);
+    Eigen::Vector3d computeNormal(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& referenceVector);
 
 
         

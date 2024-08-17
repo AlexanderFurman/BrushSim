@@ -1,24 +1,22 @@
 #include "visualizers/OpenCVVisualizer.h"
 #include <opencv2/core/eigen.hpp>
+#include "utils/Parsing.h"
+
 void OpenCVVisualizer::initialize(const IConfig& config){
-    throw std::runtime_error("Not implemented");
+    const std::map<std::string, std::string> visConfig = config.getVisualizerConfig();
+    int h = parsing::parseInt(visConfig.at("canvas height"));
+    int w = parsing::parseInt(visConfig.at("canvas width"));
+    m_canvas.resize(h, w);
 }
 
-void OpenCVVisualizer::visualize(const SimResult& result){
+void OpenCVVisualizer::visualize(const SimStep& step, const SimResult& result){
     //NOTE: through testing it was found that this function can currently run at roughly 22 fps
 
 
     //TODO: Add stroke direction vector, and lines connecting the strokes
 
     ///////// GET BRUSH STROKE /////////////////
-    auto brushStroke = result.getBrushStroke();
-    double h = brushStroke.rows();
-    double w = brushStroke.cols();
-    if (m_canvas.rows() == 0 || m_canvas.cols() == 0){ //TODO: move this to initialization
-
-        m_canvas.resize(h, w);
-        m_canvas.setZero(); // Initialize canvas to zeros
-    }
+    auto brushStroke = result.brushStroke;
 
     m_canvas = m_canvas + brushStroke;
     m_canvas = m_canvas.cwiseMin(1.0); // clamp values between 0 and 1

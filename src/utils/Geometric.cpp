@@ -1,6 +1,7 @@
 #include "utils/Geometric.h"
 #include <Eigen/Geometry>
 #include <stdexcept>
+#include "utils/Conversions.h"
 
 namespace geometric{
     
@@ -86,5 +87,24 @@ namespace geometric{
         double t = (planeNormal.dot(planePoint - linePoint)) / denom;
         Eigen::Vector3d intersection = linePoint + t * lineDir;
         return intersection;
+    }
+
+    Eigen::Vector3d computeCentroid(const std::vector<Eigen::Vector3d>& points){
+        Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
+        for (const auto& point: points){
+            centroid += point;
+        }
+        int n = points.size();
+        centroid = centroid / n;
+        return centroid;
+    }
+
+    Eigen::Vector3d computeNormal(const Eigen::Vector3d& orientation, const Eigen::Vector3d& referenceVector){
+        Eigen::Matrix3d rotation = conversions::eulerToRotationMatrix(orientation); // convert orientation vector to a rotation matrix
+        return computeNormal(rotation, referenceVector);
+    }
+
+    Eigen::Vector3d computeNormal(const Eigen::Matrix3d& rotation, const Eigen::Vector3d& referenceVector){
+        return rotation * referenceVector;
     }
 }

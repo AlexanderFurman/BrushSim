@@ -3,45 +3,15 @@
 
 #include "interfaces/ISimulationData.h"
 
-// TODO: Consider revamping these classes to be more generic, or possibly work with an adapter class
-class SimStep: public ISimulationData {
-    public:
-    // Constructor
-    SimStep(const Pose& brushStemPose, const Twist& brushStemTwist, const double timeStamp)
-    : m_brushStemPose(brushStemPose), m_brushStemTwist(brushStemTwist), m_timeStamp(timeStamp) {}
-
-    Pose getBrushPose() const {return m_brushStemPose;}
-    Twist getBrushTwist() const {return m_brushStemTwist;}
-    double getTimeStamp() const {return m_timeStamp;}
-    
-    private:
-    Pose m_brushStemPose;
-    Twist m_brushStemTwist;
-    double m_timeStamp;
+struct SimStep {
+    Pose pose;
+    Twist twist;
+    double timestamp;
 };
 
-class SimResult: public ISimulationData {
-    public:
-    SimResult(const Eigen::MatrixXd& brushStroke, const Eigen::Vector3d& brushStemPosition, const Eigen::Vector3d& brushNormal, const Eigen::Vector3d& strokeDirection, 
-                const std::vector<Eigen::Vector3d>& vertices, const double timeStamp)
-                : m_brushStroke(brushStroke), m_brushStemPosition(brushStemPosition), m_brushNormal(brushNormal), m_strokeDirection(strokeDirection),
-                    m_vertices(vertices), m_timeStamp(timeStamp) {}
-    
-    Eigen::MatrixXd getBrushStroke() const {return m_brushStroke;}
-    Eigen::Vector3d getBrushPosition() const {return m_brushStemPosition;}
-    Eigen::Vector3d getBrushNormal() const {return m_brushNormal;}
-    Eigen::Vector3d getBrushStrokeDirection() const {return m_strokeDirection;}
-    std::vector<Eigen::Vector3d> getBrushVertices() const {return m_vertices;}
-    double getTimeStamp() const {return m_timeStamp;}
-    
-
-    private:
-    Eigen::MatrixXd m_brushStroke; // instantaneous brush stroke on the canvas
-    Eigen::Vector3d m_brushStemPosition; 
-    Eigen::Vector3d m_brushNormal;
-    Eigen::Vector3d m_strokeDirection;
-    std::vector<Eigen::Vector3d> m_vertices; // vertices describing the brush's position in 3D
-    double m_timeStamp;
+struct SimResult {
+    Eigen::MatrixXd brushStroke; // instantaneous brush stroke on the canvas (NOTE: replace this with some representation for 3 channeled color image)
+    std::vector<Eigen::Vector3d> vertices; // vertices describing the brush's position in 3D
 };
 
 

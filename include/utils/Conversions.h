@@ -14,6 +14,9 @@ namespace conversions {
     // Function which finds all non-zero elements in a matrix and returns a vector of their indices
     std::vector<Eigen::Vector2i> findNonZeroIndices(const Eigen::MatrixXd& matrix);
     
+    // Converts vector of n Eigen::Vector3d elements to a Eigen::MatrixXd with n rows, 3 cols.
+    Eigen::MatrixXd vectorToMatrix(const std::vector<Eigen::Vector3d>& vec);
+    
 } // namespace conversions
 
 #endif // CONVERSIONS_H

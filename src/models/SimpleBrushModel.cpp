@@ -32,17 +32,13 @@ const SimResult SimpleBrushModel::getResult() const {
     std::vector<Eigen::Vector3d> vertices = handleVertices;
     vertices.insert(vertices.end(), brushVertices.begin(), brushVertices.end());
 
-    
-
-    SimResult result = SimResult(m_footprint.paintDeposited, m_brushStemPose.position, m_brushNormal, 
-                                    m_brushStemTwist.linearVelocity, vertices, m_timeStamp);
-    return result;
+    return SimResult{m_footprint.paintDeposited, vertices};
 }
 
 void SimpleBrushModel::updateBrushState(const SimStep& simStep){
-    m_brushStemPose = simStep.getBrushPose(); // Pose of brush stem
-    m_brushStemTwist = simStep.getBrushTwist(); // Twist of brush stem
-    m_timeStamp = simStep.getTimeStamp(); // simulation timestamp
+    m_brushStemPose = simStep.pose; // Pose of brush stem
+    m_brushStemTwist = simStep.twist; // Twist of brush stem
+    m_timeStamp = simStep.timestamp; // simulation timestamp
 
     Eigen::Matrix3d brushRotation = conversions::eulerToRotationMatrix(m_brushStemPose.orientation); // convert orientation of the brush to a rotation vector
     m_brushTipPosition = brushRotation * ( m_brushStemPose.position + Eigen::Vector3d(0,0,-m_brushLength) ); // update the position of the brush tip's position

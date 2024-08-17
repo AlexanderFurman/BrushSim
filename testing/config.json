@@ -12,5 +12,9 @@
         "hair length": "20",
         "hair count": "100"
     },
-    "visualizer":{}
+    "visualizer":{
+        "brush initial pose": "100,100,25;0,0,0",
+        "canvas width": "600",
+        "canvas height": "500"
+    }
 }

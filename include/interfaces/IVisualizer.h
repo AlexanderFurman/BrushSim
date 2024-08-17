@@ -7,7 +7,7 @@
 class IVisualizer{
     public:
     virtual ~IVisualizer() = default;
-    virtual void visualize(const SimResult& data) = 0;
+    virtual void visualize(const SimStep& step, const SimResult& result) = 0;
     virtual void initialize(const IConfig& config) = 0;
 };
 

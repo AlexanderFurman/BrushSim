@@ -6,7 +6,7 @@
 
 class OpenCVVisualizer: public IVisualizer{
     public:
-    void visualize(const SimResult& result) override;
+    void visualize(const SimStep& step, const SimResult& result) override;
     void initialize(const IConfig& config) override;
 
     private:

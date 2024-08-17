@@ -54,5 +54,15 @@ namespace conversions {
 
         return points;
     };
+
+    Eigen::MatrixXd vectorToMatrix(const std::vector<Eigen::Vector3d>& vec){
+        Eigen::MatrixXd mat;
+        mat.resize(vec.size(), 3);
+
+        for (size_t i; i<vec.size(); i++){
+            mat.row(i) = vec[i].transpose();
+        }
+        return mat;
+    }
     
 }
