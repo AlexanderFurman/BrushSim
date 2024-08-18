@@ -5,6 +5,9 @@
 #include "visualizers/OpenCVVisualizer.h"
 #include "simulation_data/SimulationData.h"
 #include "utils/Geometric.h"
+#include "json.hpp"
+
+#include <fstream>
 
 
 int main(int, char**){
@@ -68,10 +71,20 @@ int main(int, char**){
         position_prev = position;
     }
 
+    using json = nlohmann::json;
 
+    json j;
+
+    j["steps"] = {}
+    int i=0
     for (const auto step: steps){
-        model.updateState(step);
-        auto result = model.getResult();
-         visualizer.visualize(step, result);
+
+        j["steps"][i] = json::array({})
+
+        // model.updateState(step);
+        // auto result = model.getResult();
+        //  visualizer.visualize(step, result);
+
+        
     }
 }

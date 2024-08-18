@@ -1,6 +1,15 @@
 {
-    "simulator":{},
+    "simulator":{
+        "steps":[
+            {
+                "pose": "100,100,25;0,0,0",
+                "twist": "0,0,0;0,0,0",
+                "timestamp": 0
+            }
+        ]
+    },
     "model":{
+        "model type": "SimpleBrushModel",
         "initial pose": "100,100,25;0,0,0",
         "initial normal": "0,0,1",
         "initial twist": "0,0,0;0,0,0",
