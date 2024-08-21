@@ -71,20 +71,9 @@ int main(int, char**){
         position_prev = position;
     }
 
-    using json = nlohmann::json;
-
-    json j;
-
-    j["steps"] = {}
-    int i=0
-    for (const auto step: steps){
-
-        j["steps"][i] = json::array({})
-
-        // model.updateState(step);
-        // auto result = model.getResult();
-        //  visualizer.visualize(step, result);
-
-        
+    for (const auto& step: steps){
+        model.updateState(step);
+        const auto& result = model.getResult();
+        visualizer.visualize(step, result);
     }
 }
